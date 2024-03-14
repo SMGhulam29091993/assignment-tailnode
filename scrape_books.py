@@ -18,3 +18,11 @@ def scrape_books(page_url, collection):
             "availability": availability,
             "rating": rating  # Include the rating in the document
         })
+
+
+# Function to extract rating from the book element
+def get_rating(book):
+    rating_tag = book.find('p', class_='star-rating')
+    rating_classes = rating_tag.get('class')
+    rating = rating_classes[1] if rating_classes else 'No rating'
+    return rating
