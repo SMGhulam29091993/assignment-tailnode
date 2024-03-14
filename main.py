@@ -13,16 +13,13 @@ def fetch_and_store_users(api_key, users_collection):
         user_id = user["id"]
         first_name = user["firstName"]
         last_name = user["lastName"]
-        # Check if the 'email' key exists in the user dictionary before accessing it
-        email = user.get("email")
-        if email is not None:
-            # Insert user data into the database
-            users_collection.insert_one({
-                "user_id": user_id,
-                "first_name": first_name,
-                "last_name": last_name,
-                "email": email
-            })
+        
+        # Insert user data into the database without the email field
+        users_collection.insert_one({
+            "user_id": user_id,
+            "first_name": first_name,
+            "last_name": last_name
+        })
 
 # Function to fetch posts data for each user from the API and store it in the database
 def fetch_and_store_posts(api_key, collection):
@@ -32,17 +29,22 @@ def fetch_and_store_posts(api_key, collection):
         url = f"https://dummyapi.io/data/v1/user/{user['_id']}/post"
         headers = {"app-id": api_key}
         response = requests.get(url, headers=headers)
-        posts_data = response.json()["data"]
         
-        for post in posts_data:
-            post_data = {
-                "_id": post["id"],
-                "user_id": user["_id"],
-                "text": post["text"]
-                # Add other post data as required
-            }
-            # Insert post data into the collection
-            collection.insert_one(post_data)
+        if response.status_code == 200:
+            posts_data = response.json()["data"]
+            
+            for post in posts_data:
+                post_data = {
+                    "_id": post["id"],
+                    "user_id": user["_id"],
+                    "text": post["text"]
+                    # Add other post data as required
+                }
+                # Insert post data into the collection
+                collection.insert_one(post_data)
+        else:
+            print(f"Error fetching posts for user {user['_id']}: {response.status_code}")
+
 
 # Main function to execute the script
 def main():
