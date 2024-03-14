@@ -26,3 +26,25 @@ def get_rating(book):
     rating_classes = rating_tag.get('class')
     rating = rating_classes[1] if rating_classes else 'No rating'
     return rating
+
+
+# Function to scrape books data from all pages
+def scrape_all_books():
+    # Connect to the MongoDB server
+    client = MongoClient("mongodb://127.0.0.1:27017/")
+    # Select or create a database
+    db = client["scrape_books"]
+    # Select or create a collection for books
+    books_collection = db["books"]
+    
+    base_url = 'http://books.toscrape.com/catalogue/page-{}.html'
+    for page_num in range(1, 51):
+        page_url = base_url.format(page_num)
+        scrape_books(page_url, books_collection)
+
+# Main function
+def main():
+    scrape_all_books()
+
+if __name__ == '__main__':
+    main()
